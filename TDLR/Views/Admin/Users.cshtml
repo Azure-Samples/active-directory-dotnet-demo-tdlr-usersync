@@ -1,0 +1,51 @@
+﻿@Styles.Render("~/Content/users")
+
+@{
+    ViewBag.Title = "Users";
+}
+
+<center class="page-body">
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="container">
+            <div class="row">
+                <p class="generic-error text-danger" hidden>An error occurred, you might need to refresh the page.</p>
+                <p class="auth-error text-danger" hidden>Unable to read the directory, you might need to <a href="Account/SignIn">sign in again</a>.</p>
+                <h2>
+                    Users assigned for tenant: @ViewData["tenant"]
+                </h2>
+                <hr />
+                <button type="button" class="btn btn-em btn-refresh">Refresh</button>
+            </div>
+        </div>
+
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Display Name</th>
+                    <th>Given Name</th>
+                    <th>Surname</th>
+                    <th class="displayableID">Displayable ID</th>
+                    <th>Object ID</th>
+                    <th class="disabledIcon"></th>
+                </tr>
+            </thead>
+            <tbody class="user-list">
+                <tr class="user-template" hidden>
+                    <td class="user displayName"></td>
+                    <td class="user givenName"></td>
+                    <td class="user surname"></td>
+                    <td class="user displayableID"></td>
+                    <td class="user objectID"></td>
+                    <td class="pull-right disabledIcon">
+                        <i class="fa fa-chain-broken fa-lg"></i>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <i class="fa fa-refresh fa-spin fa-2x"></i>    
+    }
+</center>
+
+@Scripts.Render("~/Scripts/users")
+
