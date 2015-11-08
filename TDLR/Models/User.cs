@@ -1,66 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
+using System.Security.Claims;
 using System.Web;
+using Tdlr.Utils;
 
 namespace Tdlr.Models
 {
-    public class User : Microsoft.Azure.ActiveDirectory.GraphClient.User
+    // A projection of the Graph User object
+    public class User
     {
+        public User() { }
+
         public User(Microsoft.Azure.ActiveDirectory.GraphClient.User user)
         {
-            AccountEnabled = user.AccountEnabled;
-            AppRoleAssignments = user.AppRoleAssignments;
-            AssignedLicenses = user.AssignedLicenses;
-            AssignedPlans = user.AssignedPlans;
             City = user.City;
             CompanyName = user.CompanyName;
             Country = user.Country;
-            CreatedObjects = user.CreatedObjects;
-            CreatedOnBehalfOf = user.CreatedOnBehalfOf;
-            DeletionTimestamp = user.DeletionTimestamp;
-            Department = user.Department;
-            DirectReports = user.DirectReports;
-            DirSyncEnabled = user.DirSyncEnabled;
             DisplayName = user.DisplayName;
-            FacsimileTelephoneNumber = user.FacsimileTelephoneNumber;
             GivenName = user.GivenName;
-            ImmutableId = user.ImmutableId;
             JobTitle = user.JobTitle;
-            LastDirSyncTime = user.LastDirSyncTime;
             Mail = user.Mail;
             MailNickname = user.MailNickname;
-            Manager = user.Manager;
-            MemberOf = user.MemberOf;
-            Members = user.Members;
-            Mobile = user.Mobile;
-            Oauth2PermissionGrants = user.Oauth2PermissionGrants;
             ObjectId = user.ObjectId;
             ObjectType = user.ObjectType;
-            OnPremisesSecurityIdentifier = user.OnPremisesSecurityIdentifier;
-            OtherMails = user.OtherMails;
-            OwnedDevices = user.OwnedDevices;
-            OwnedObjects = user.OwnedObjects;
-            Owners = user.Owners;
-            PasswordPolicies = user.PasswordPolicies;
-            PasswordProfile = user.PasswordProfile;
-            PhysicalDeliveryOfficeName = user.PhysicalDeliveryOfficeName;
-            PostalCode = user.PostalCode;
-            PreferredLanguage = user.PreferredLanguage;
-            ProvisionedPlans = user.ProvisionedPlans;
-            ProvisioningErrors = user.ProvisioningErrors;
-            ProxyAddresses = user.ProxyAddresses;
-            RegisteredDevices = user.RegisteredDevices;
-            SipProxyAddress = user.SipProxyAddress;
-            State = user.State;
-            StreetAddress = user.StreetAddress;
             Surname = user.Surname;
             TelephoneNumber = user.TelephoneNumber;
             UsageLocation = user.UsageLocation;
             UserPrincipalName = user.UserPrincipalName;
-            UserType = user.UserType;
+            TenantId = ClaimsPrincipal.Current.FindFirst(Globals.TenantIdClaimType).Value;
         }
         public string assignmentStatus { get; set; }
+        [Key]
+        public string ObjectId { get; set; }
+        public string City { get; set; }
+        public string CompanyName { get; set; }
+        public string JobTitle { get; set; }
+        public string Country { get; set; }
+        public string DisplayName { get; set; }
+        public string State { get; set; }
+        public string GivenName { get; set; }
+        public string Mail { get; set; }
+        public string MailNickname { get; set; }
+        public string ObjectType { get; set; }
+        public string TelephoneNumber { get; set; }
+        public string Surname { get; set; }
+        public string UsageLocation { get; set; }
+        public string UserPrincipalName { get; set; }
+        public string TenantId { get; set; }
     }
 }

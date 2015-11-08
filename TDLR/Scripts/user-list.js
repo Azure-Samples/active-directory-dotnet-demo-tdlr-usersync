@@ -17,8 +17,10 @@ $("button.btn-refresh").click(function (e) {
         }).fail(function (xhr) {
             if (xhr.status == 401) {
                 $authErrorMessage.show();
+                $refresh.hide();
             } else {
                 $errorMessage.show();
+                $refresh.hide();
             }
         });
     }

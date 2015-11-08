@@ -26,5 +26,6 @@ namespace Tdlr.DAL
         public DbSet<Task> Tasks { get; set; }
         public DbSet<AadObject> AadObjects { get; set; }
         public DbSet<TokenCacheEntry> TokenCacheEntries { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }

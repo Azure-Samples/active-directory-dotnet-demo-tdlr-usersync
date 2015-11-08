@@ -8,77 +8,109 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.Azure.ActiveDirectory.GraphClient;
 using Microsoft.Azure.ActiveDirectory.GraphClient.Extensions;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Tdlr.DAL;
 using Tdlr.Utils;
 
 namespace Tdlr.Controllers
 {
     public class AdminApiController : ApiController
     {
-        private static Dictionary<string, List<Models.User>> _assignedUsersByTenant = new Dictionary<string, List<Models.User>>();
-
         [HttpGet]
         [HostAuthentication("AADBearer")]
         [Authorize]
         public async Task<List<Models.User>> GetAssignedUsers()
         {
-            string tenantId = ClaimsPrincipal.Current.FindFirst(Globals.TenantIdClaimType).Value;
-            ActiveDirectoryClient graphClient = new ActiveDirectoryClient(new Uri(Globals.GraphApiUrl, tenantId), async () => await GraphHelper.AcquireToken());
-
-            List<Models.User> assignedUsersHistory;
-            if (!_assignedUsersByTenant.TryGetValue(tenantId, out assignedUsersHistory))
-                assignedUsersHistory = new List<Models.User>();
-            List<Models.User> assignedUsersWithStatus = new List<Models.User>(assignedUsersHistory);
-            List<Models.User> updatedUsersHistory = new List<Models.User>(assignedUsersHistory);
-
-            ServicePrincipal sp = (ServicePrincipal)graphClient.ServicePrincipals.Where(servicePrincpial => servicePrincpial.AppId.Equals(ConfigHelper.ClientId)).ExecuteAsync().Result.CurrentPage.FirstOrDefault();
-            IServicePrincipalFetcher spFetcher = sp;
-            List<IAppRoleAssignment> assignments = spFetcher.AppRoleAssignedTo.ExecuteAsync().Result.CurrentPage.ToList(); // TODO: Paging
-
-            // TODO: Error Handling
-            foreach (IAppRoleAssignment assignment in assignments)
+            try
             {
-                if (assignment.PrincipalType == "User")
+                // Create the Graph Client
+                string tenantId = ClaimsPrincipal.Current.FindFirst(Globals.TenantIdClaimType).Value;
+                ActiveDirectoryClient graphClient = new ActiveDirectoryClient(new Uri(Globals.GraphApiUrl, tenantId), async () => await GraphHelper.AcquireTokenAsApp());
+
+                // Read users from db for evaluating in memory
+                List<Models.User> userHistory = UsersDbHelper.GetUsersForTenant(tenantId);
+                List<Models.User> usersWithStatus = new List<Models.User>(userHistory);
+                List<Models.User> updatedUserHistory = new List<Models.User>(userHistory);
+
+                // Get the assignments for the application
+                ServicePrincipal sp = (ServicePrincipal)graphClient.ServicePrincipals.Where(servicePrincpial => servicePrincpial.AppId.Equals(ConfigHelper.ClientId)).ExecuteAsync().Result.CurrentPage.FirstOrDefault();
+                IServicePrincipalFetcher spFetcher = sp;
+                List<IAppRoleAssignment> assignments = spFetcher.AppRoleAssignedTo.ExecuteAsync().Result.CurrentPage.ToList(); // TODO: Paging
+
+                // TODO: Better Error Handling
+                // TODO: Retry Logic
+                // TODO: Nested Groups
+                // TODO: Paged Results on Assignments
+                // TODO: Paged Results on Group Membership
+                // TODO: Performance & Batch Queries
+
+                // Get the groups assigned to the app first
+                foreach (IAppRoleAssignment assignment in assignments)
                 {
-                    User user = (User) await graphClient.Users.GetByObjectId(assignment.PrincipalId.ToString()).ExecuteAsync();
-                    int existingUserIndex = assignedUsersHistory.FindIndex(u => u.ObjectId == user.ObjectId);
-                    if (existingUserIndex == -1)
+                    if (assignment.PrincipalType == "Group")
                     {
-                        assignedUsersWithStatus.Add(new Models.User(user) { assignmentStatus = "New" });
-                        updatedUsersHistory.Add(new Models.User(user));
-                    }
-                    else
-                    {
-                        assignedUsersWithStatus[assignedUsersWithStatus.FindIndex(u => u.ObjectId == user.ObjectId)] = new Models.User(user) { assignmentStatus = "Enabled" };
-                        updatedUsersHistory[existingUserIndex] = new Models.User(user);
-                    }
-                }
-                else if (assignment.PrincipalType == "Group")
-                {
-                    IGroupFetcher gFetcher = graphClient.Groups.GetByObjectId(assignment.PrincipalId.ToString());
-                    List<IDirectoryObject> members = gFetcher.Members.ExecuteAsync().Result.CurrentPage.ToList(); // TODO: Paging
-                    foreach (IDirectoryObject member in members)
-                    {
-                        if (member is User)
-                        {   // TODO: Nested Groups
-                            User user = (User)member;
-                            int existingUserIndex = assignedUsersHistory.FindIndex(u => u.ObjectId == user.ObjectId);
-                            if (existingUserIndex == -1 && assignedUsersWithStatus.FindIndex(u => u.ObjectId == user.ObjectId) == -1)
-                            {
-                                assignedUsersWithStatus.Add(new Models.User(user) { assignmentStatus = "New" });
-                                updatedUsersHistory.Add(new Models.User(user));
-                            }
-                            else if (existingUserIndex >= 0)
-                            {
-                                assignedUsersWithStatus[assignedUsersWithStatus.FindIndex(u => u.ObjectId == user.ObjectId)] = new Models.User(user) { assignmentStatus = "Enabled" };
-                                updatedUsersHistory[existingUserIndex] = new Models.User(user);
+                        // Get the group members
+                        IGroupFetcher gFetcher = graphClient.Groups.GetByObjectId(assignment.PrincipalId.ToString());
+                        List<IDirectoryObject> members = gFetcher.Members.ExecuteAsync().Result.CurrentPage.ToList();
+
+                        foreach (IDirectoryObject member in members)
+                        {
+                            if (member is User)
+                            {   
+                                User user = (User)member;
+                                int existingUserIndex = userHistory.FindIndex(u => u.ObjectId == user.ObjectId);
+
+                                // If the user did not exist in the db before
+                                if (existingUserIndex == -1)
+                                {
+                                    // The user is new
+                                    usersWithStatus.Add(new Models.User(user) { assignmentStatus = "New" });
+                                    updatedUserHistory.Add(new Models.User(user));
+                                }
+                                else
+                                {
+                                    // The user is active, but not new
+                                    usersWithStatus[usersWithStatus.FindIndex(u => u.ObjectId == user.ObjectId)] = new Models.User(user) { assignmentStatus = "Enabled" };
+                                    updatedUserHistory[existingUserIndex] = new Models.User(user);
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            _assignedUsersByTenant[tenantId] = updatedUsersHistory;
-            return assignedUsersWithStatus;
+                // Get the users assigned to the app second
+                foreach (IAppRoleAssignment assignment in assignments)
+                {
+                    if (assignment.PrincipalType == "User")
+                    {
+                        int existingUserIndex = userHistory.FindIndex(u => u.ObjectId == assignment.PrincipalId.ToString());
+                        int assignedUserIndex = usersWithStatus.FindIndex(u => u.ObjectId == assignment.PrincipalId.ToString());
+
+                        // If we haven't seen the user before, add it
+                        if (existingUserIndex == -1 &&  assignedUserIndex == -1)
+                        {
+                            User user = (User)await graphClient.Users.GetByObjectId(assignment.PrincipalId.ToString()).ExecuteAsync();
+                            usersWithStatus.Add(new Models.User(user) { assignmentStatus = "New" });
+                            updatedUserHistory.Add(new Models.User(user));
+                        }
+
+                        // If we have seen the user before but didn't already update his data as part of group assignment, update the user data.
+                        else if (existingUserIndex >= 0 && string.IsNullOrEmpty(usersWithStatus[assignedUserIndex].assignmentStatus))
+                        {
+                            User user = (User)await graphClient.Users.GetByObjectId(assignment.PrincipalId.ToString()).ExecuteAsync();
+                            usersWithStatus[usersWithStatus.FindIndex(u => u.ObjectId == user.ObjectId)] = new Models.User(user) { assignmentStatus = "Enabled" };
+                            updatedUserHistory[existingUserIndex] = new Models.User(user);
+                        }
+                    }
+                }
+
+                UsersDbHelper.SaveUsersForTenant(tenantId, updatedUserHistory);
+                return usersWithStatus;
+            }
+            catch (AdalException ex)
+            {
+                throw new HttpResponseException(HttpStatusCode.Unauthorized);
+            }
         }
     }
 }

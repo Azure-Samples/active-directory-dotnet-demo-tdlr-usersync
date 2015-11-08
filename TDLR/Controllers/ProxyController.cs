@@ -56,7 +56,7 @@ namespace Tdlr.Controllers
                 try
                 {
                     // Get a token from the ADAL cache
-                    string token = await GraphHelper.AcquireToken();
+                    string token = await GraphHelper.AcquireTokenAsUser();
 
                     // Send the Graph API query
                     HttpClient client = new HttpClient();
