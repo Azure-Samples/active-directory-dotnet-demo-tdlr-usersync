@@ -26,6 +26,26 @@ $("button.btn-refresh").click(function (e) {
     }
 });
 
+$("button.btn-clear").click(function (e) {
+    if (!isRefreshing) {
+        $userList.empty();
+        $refresh.slideDown("slow");
+        isRefreshing = true;
+        $.getJSON("/api/admin/users/clear", function (json) {
+            isRefreshing = false;
+            $refresh.hide();
+        }).fail(function (xhr) {
+            if (xhr.status == 401) {
+                $authErrorMessage.show();
+                $refresh.hide();
+            } else {
+                $errorMessage.show();
+                $refresh.hide();
+            }
+        });
+    }
+});
+
 function appendUser(obj) {
     $template = $userTemplate.clone();
     $template.removeAttr("hidden");

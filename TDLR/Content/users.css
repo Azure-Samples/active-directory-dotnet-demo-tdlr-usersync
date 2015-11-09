@@ -2,6 +2,16 @@
     margin-top: 150px;
 }
 
+div.btn-users {
+    display: inline;
+}
+
+.btn-refresh,
+.btn-clear {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
 td.user {
     color: rgb(88, 88, 88);
     font-size: 16px;
@@ -74,7 +84,6 @@ table.table-striped tr.new-user {
     height: 40px;
     width: 200px;
     margin-bottom:20px;
-    display: block;
 }
 
 .btn-em:hover,

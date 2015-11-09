@@ -24,6 +24,13 @@ namespace Tdlr
             );
 
             config.Routes.MapHttpRoute(
+                name: "ClearUsers",
+                routeTemplate: "api/admin/users/clear",
+                defaults: new { controller = "AdminApi", action = "ClearUserTable" },
+                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) }
+            );
+
+            config.Routes.MapHttpRoute(
                 name: "UpdateApi",
                 routeTemplate: "api/tasks/{id}",
                 defaults: new { id = RouteParameter.Optional, controller = "TasksApi", action = "Update" },

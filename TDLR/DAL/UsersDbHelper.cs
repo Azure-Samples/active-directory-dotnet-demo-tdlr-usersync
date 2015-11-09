@@ -36,5 +36,16 @@ namespace Tdlr.DAL
             }
             db.SaveChanges();
         }
+
+        public static void ClearUsersForTenant(string tenantId)
+        {
+            TdlrContext db = new TdlrContext();
+            List<User> existingUsers = db.Users.Where(u => u.TenantId == tenantId).ToList();
+            foreach (User user in existingUsers)
+            {
+                db.Users.Remove(user);
+            }
+            db.SaveChanges();
+        }
     }
 }

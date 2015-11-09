@@ -112,6 +112,16 @@ namespace Tdlr.Controllers
                 throw new HttpResponseException(HttpStatusCode.Unauthorized);
             }
         }
+
+        [HttpGet]
+        [HostAuthentication("AADBearer")]
+        [Authorize]
+        public void ClearUserTable()
+        {
+            string tenantId = ClaimsPrincipal.Current.FindFirst(Globals.TenantIdClaimType).Value;
+            UsersDbHelper.ClearUsersForTenant(tenantId);
+        }
+
     }
 }
 
