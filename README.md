@@ -5,7 +5,7 @@ author: dstrockis
 ---
 
 # Demo - To-do list reimagined web app
-This code sample is one of three referenced in the Azure AD sessions of the [Microsoft Cloud Roadshow](https://www.microsoftcloudroadshow.com/).  Recordings of these sessions will be available shortly [here]().  We recommned you watch one of these recordings to understand the purpose and goals of this code sample.
+This code sample is one of three referenced in the Azure AD sessions of the [Microsoft Cloud Roadshow](https://www.microsoftcloudroadshow.com/).  Recordings of these sessions will be available shortly [here](https://mva.microsoft.com/en-US/training-courses/add-identity-into-your-cloudbased-apps-13989).  We recommend you watch one of these recordings to understand the purpose and goals of this code sample.
 
 To-Do List Reimagined (tdlr;) is a new cloud service that allows users to store and manage a list of tasks.  It integrates with Azure AD in order to provide enterprise features to its customers that have an existing Azure AD tenant.  These features include:
 
@@ -20,7 +20,7 @@ The full service consists of three different sample projects:
 
 - [The tdlr; web application](https://github.com/azureadsamples/azureroadshow-web), written as .NET 4.5 MVC app.
 - [The tdlr; iOS application](https://github.com/azureadsamples/azureroadshow-xamarin), written as a cross-platform Xamarin app.
-- [The tdlr; admin web portal](https://github.com/azureadsamples/azureroadshow-web-admin), written as a .NET 4.5 MVC app.
+- [The tdlr; admin web portal](https://github.com/azureadsamples/azureroadshow-web-autouserprovisioning), written as a .NET 4.5 MVC app.
 
 ## Running the tdlr; web app
 
@@ -66,6 +66,6 @@ To run the app, you'll need to enter the information from your app registration.
 
 ### Run the app!
 
-You can now run the tdlr; app and explore its functionality.  Try signing up and signing in with your Azure AD users, creating tasks, and sharing them with other users.  To understand the code behind the app, we recommend you watch on of the recorded Microsoft Cloud Roadshow sessions which will be available soon [here]().  If you're already familiar with Azure AD, you may find the code comments instructive as well.
+You can now run the tdlr; app and explore its functionality.  Try signing up and signing in with your Azure AD users, creating tasks, and sharing them with other users.  To understand the code behind the app, we recommend you watch on of the recorded Microsoft Cloud Roadshow sessions which will be available soon [here](https://mva.microsoft.com/en-US/training-courses/add-identity-into-your-cloudbased-apps-13989).  If you're already familiar with Azure AD, you may find the code comments instructive as well.
 
 
