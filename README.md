@@ -4,7 +4,7 @@ platforms: dotnet
 author: dstrockis
 ---
 
-# Demo - To-do list reimagined web app
+# Demo - To-do list reimagined admin web portal
 This code sample is one of three referenced in the Azure AD sessions of the [Microsoft Cloud Roadshow](https://www.microsoftcloudroadshow.com/).  Recordings of these sessions will be available shortly [here](https://mva.microsoft.com/en-US/training-courses/add-identity-into-your-cloudbased-apps-13989).  We recommend you watch one of these recordings to understand the purpose and goals of this code sample.
 
 To-Do List Reimagined (tdlr;) is a new cloud service that allows users to store and manage a list of tasks.  It integrates with Azure AD in order to provide enterprise features to its customers that have an existing Azure AD tenant.  These features include:
@@ -22,7 +22,9 @@ The full service consists of three different sample projects:
 - [The tdlr; iOS application](https://github.com/azureadsamples/azureroadshow-xamarin), written as a cross-platform Xamarin app.
 - [The tdlr; admin web portal](https://github.com/azureadsamples/azureroadshow-web-autouserprovisioning), written as a .NET 4.5 MVC app.
 
-## Running the tdlr; web app
+This TDLR; admin web portal is another instance of the [TDLR; web app](https://github.com/azureadsamples/azureroadshow-web), but adds one additional feature.  The admin portal uses the application's identity to sync the list of users that the company's administrators have assigned to the application.  This allows the company admins to handle all user access, and for the applicaition to automatically react to changes using the Azure AD Graph API.  The most relevant code for this sync mechanism is located in the [AdminApiController](https://github.com/AzureADSamples/azureroadshow-web-autouserprovisioning/blob/master/TDLR/Controllers/AdminApiController.cs). 
+
+## Running the tdlr; admin web portal
 
 ### Register an app with Azure AD
 
@@ -43,13 +45,14 @@ You'll also need an Azure Activce Directory tenant in which to register your app
 11. Find the Client ID value and copy it aside, you will need this later when configuring your application.
 11. Find "the application is multi-tenant" switch and flip it to yes.
 12. Create a new key for the application.  Save the configuration so you can view the key value.  Save this aside for when you configure the project in Visual Studio.
-13. In "Permissions to Other Applications", click the dropdown for "Delegated Permissions".  Check the `Read all users' basic profiles` permission, and Save the configuration.  Your app should now show two delegated permission.
+13. In "Permissions to Other Applications", click the dropdown for "Delegated Permissions".  Check the `Read all users' basic profiles` permission.
+14. Also in "Permissions to Other Applications", click the dropdown for "Application Permissions", and check `Read Directory Data`.  Save the configuration.  Your app should now show two delegated permissions and one application permission.
 
 ### Download the code
 
-Now you can [download this repo as a zip](https://github.com/AzureADSamples/azureroadshow-web/archive/master.zip) or clone it to your local machine:
+Now you can [download this repo as a zip](https://github.com/AzureADSamples/azureroadshow-web-autouserprovisioning/archive/master.zip) or clone it to your local machine:
 
-`git clone https://github.com/azureadsamples/azureroadshow-web`
+`git clone https://github.com/azureadsamples/azureroadshow-web-autouserprovisioning`
 
 In your local repo, open the `TDLR.sln` file.  We recommned you use [Visual Studio 2015](https://www.visualstudio.com/), which will restore all necessary packages for you when you run the app for the first time. 
 
